@@ -1,0 +1,9 @@
+[connections.default]
+warehouse = "CICD_WH"
+role = "CICD_ROLE"
+database = "CICD_DEMO_DB"
+schema = "PUBLIC"
+account = "PJYLBXO-IB21088"
+user = "asingh92"
+password = "Singh007@mr@it"
+
