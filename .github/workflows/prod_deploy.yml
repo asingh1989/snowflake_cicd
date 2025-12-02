@@ -37,8 +37,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Snow CLI
-        uses: snowflakedb/snowflake-cli-action@v1.5
+      
+      # Install Snowflake CLI GitHub Action and point to config file
+      - name: Install snowflake-cli
+        uses: Snowflake-Labs/snowflake-cli-action@v1.5
+        with:
+          cli-version: "latest"
+          default-config-file-path: ".snowflake/config.toml"  
 
       - name: Find and Deploy Modified SQL Files
         run: |
