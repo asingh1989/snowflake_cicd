@@ -12,15 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-      # SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
-      # SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
-      # SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
-      # SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
-      # SNOWFLAKE_PRIVATE_KEY_RAW: ${{ secrets.SNOWFLAKE_PRIVATE_KEY_RAW }}
-      # PRIVATE_KEY_PASSPHRASE: ${{ secrets.SNOWFLAKE_PRIVATE_KEY_PASSPHRASE }}
-      # SNOWFLAKE_AUTHENTICATOR: 'SNOWFLAKE_JWT'
-
+     
 
       SNOWFLAKE_CONNECTIONS_DEFAULT_AUTHENTICATOR: "SNOWFLAKE_JWT"
       SNOWFLAKE_CONNECTIONS_DEFAULT_PRIVATE_KEY_FILE: ".snowflake/rsa_key.pem"
@@ -37,6 +29,17 @@ jobs:
         with:
           fetch-depth: 0
       
+      - name: Test Basic Snowflake Connection
+        run: |
+          echo "🔗 Testing basic Snowflake connection..."
+          if snow connection test; then
+            echo "✅ Basic connection test passed"
+          else
+            echo "❌ Basic connection test failed"
+            exit 1
+          fi
+
+
       # Write private key secret as file
       - name: Configure Private Key
         run: |
