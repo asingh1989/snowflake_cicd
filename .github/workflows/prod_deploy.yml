@@ -36,7 +36,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
+      
+      # Write private key secret as file
+      - name: Configure Private Key
+        run: |
+          mkdir -p .snowflake
+          echo "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}" > .snowflake/rsa_key.pem
+          chmod 600 .snowflake/rsa_key.pem
       
       # Install Snowflake CLI GitHub Action and point to config file
       - name: Install snowflake-cli
