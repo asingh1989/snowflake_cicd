@@ -4,6 +4,6 @@ role = "ACCOUNTADMIN"
 database = "CICD_DEMO_DB"
 schema = "PUBLIC"
 account = "PJYLBXO-IB21088"
-user = "asingh92"
+user = "CICD_USER"
 password = "Singh007@mr@it"
 
