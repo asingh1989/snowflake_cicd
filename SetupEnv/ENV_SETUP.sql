@@ -18,6 +18,7 @@ GRANT USAGE ON DATABASE CICD_DEMO_DB TO ROLE CICD_ROLE;
 GRANT CREATE SCHEMA ON DATABASE CICD_DEMO_DB TO ROLE CICD_ROLE;
 
 
+
 -- 5. FUTURE GRANTS: Apply permissions automatically to all NEW objects created in the database --
 
 -- Grant comprehensive permissions on all FUTURE schemas
