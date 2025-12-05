@@ -132,6 +132,16 @@ jobs:
 
           echo "The following files will be deployed in this order:"
           echo "$FILES_TO_DEPLOY"
+            echo "Preview: the following files would be deployed in this order:"
+            echo "$FILES_TO_DEPLOY"
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              CONFIRM="${{ github.event.inputs.confirm_deploy }}"
+              echo "Confirmation input: '${CONFIRM}'"
+              if [ "$CONFIRM" != "yes" ]; then
+                echo "Confirmation not given (confirm_deploy != 'yes'). Exiting after preview."
+                exit 0
+              fi
+            fi
 
           # This variable will track if any script fails during the loop.
           OVERALL_STATUS=0
