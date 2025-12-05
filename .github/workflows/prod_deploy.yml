@@ -5,6 +5,21 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      compare_from:
+        description: "Commit SHA or ref to compare from (e.g., previous deploy SHA, tag, or branch)"
+        required: false
+        type: string
+      compare_type:
+        description: "Interpretation of compare_from"
+        required: false
+        default: "commit"
+        type: choice
+        options:
+          - commit
+          - tag
+          - branch
 
 jobs:
   deploy-snowflake-changes:
@@ -73,19 +88,38 @@ jobs:
       - name: Find and Deploy Modified SQL Files
         run: |
           echo "Identifying changed files..."
-          BEFORE_SHA="${{ github.event.before }}"
           CURRENT_SHA="${{ github.sha }}"
-          # Fallback for first push/branch where BEFORE_SHA may be empty or all zeros
-          if [ -z "$BEFORE_SHA" ] || [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
-            echo "No valid before SHA; deriving base from main."
-            git fetch origin main || true
-            BASE=$(git merge-base HEAD origin/main || echo "")
-            BEFORE_SHA="${BASE:-$(git rev-list --max-parents=0 HEAD | tail -n 1)}"
-          fi          
+          # Determine base reference based on event type and optional input
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.compare_from }}" ]; then
+            BASE_INPUT="${{ github.event.inputs.compare_from }}"
+            TYPE_INPUT="${{ github.event.inputs.compare_type }}"
+            echo "Manual run: comparing from input '${BASE_INPUT}' (type=${TYPE_INPUT}) to ${CURRENT_SHA}"
+            git fetch --all --tags --prune || true
+            if [ "$TYPE_INPUT" = "tag" ] || [ "$TYPE_INPUT" = "branch" ]; then
+              BASE_SHA=$(git rev-parse "${BASE_INPUT}^{commit}" 2>/dev/null || true)
+            else
+              BASE_SHA=$(git rev-parse "${BASE_INPUT}" 2>/dev/null || true)
+            fi
+            if [ -z "$BASE_SHA" ]; then
+              echo "Could not resolve input '${BASE_INPUT}' to a commit SHA. Exiting."
+              exit 1
+            fi
+          else
+            BEFORE_SHA="${{ github.event.before }}"
+            # Fallback for first push/branch where BEFORE_SHA may be empty or all zeros
+            if [ -z "$BEFORE_SHA" ] || [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+              echo "No valid before SHA; deriving base from main."
+              git fetch origin main || true
+              BASE=$(git merge-base HEAD origin/main || echo "")
+              BEFORE_SHA="${BASE:-$(git rev-list --max-parents=0 HEAD | tail -n 1)}"
+            fi
+            BASE_SHA="$BEFORE_SHA"
+            echo "Push event: comparing from ${BASE_SHA} to ${CURRENT_SHA}"
+          fi
           
           # Get a list of all changed .sql files between the previous commit and the current one.
           # This reliably finds all files that were part of the push.
-          CHANGED_FILES=$(git diff --name-only "$BEFORE_SHA" "$CURRENT_SHA" -- 'Snowflake/**/*.sql' || true)
+          CHANGED_FILES=$(git diff --name-only "$BASE_SHA" "$CURRENT_SHA" -- 'Snowflake/**/*.sql' || true)
 
           # If no .sql files were changed, exit the script gracefully.
           if [ -z "$CHANGED_FILES" ]; then
