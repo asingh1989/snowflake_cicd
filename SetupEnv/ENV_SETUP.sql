@@ -1,4 +1,4 @@
-USE ROLE ACCOUNTADMIN;
+
 
 -- 1. Create a custom role for CI/CD process
 CREATE ROLE IF NOT EXISTS CICD_ROLE;
