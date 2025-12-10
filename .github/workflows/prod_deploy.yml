@@ -21,13 +21,13 @@ on:
           - tag
           - branch
       confirm_deploy:
-        description: "Confirm deployment after preview (yes/no)"
+        description: "Confirm deployment after preview (true/false)"
         required: false
-        default: "yes"
+        default: "TRUE"
         type: choice
         options:
-          - yes
-          - no
+          - TRUE
+          - FALSE
 
 jobs:
   deploy-snowflake-changes:
